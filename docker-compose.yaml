@@ -1,0 +1,153 @@
+version: '3'
+
+services:
+  config-service:
+    restart: always
+    container_name: config-service
+    build: ./config-service
+    networks:
+      - backend
+    expose:
+      - "8888"
+    volumes:
+      - ./configs:/app/configs
+
+  eureka-service:
+    restart: always
+    container_name: eureka-service
+    build: ./eureka-service
+    networks:
+      - backend
+    depends_on:
+      - config-service
+    ports:
+      - "8761:8761"
+
+  dummy-service:
+    restart: always
+    container_name: dummy-service
+    build: ./dummy
+    networks:
+      - backend
+    depends_on:
+      - config-service
+      - eureka-service
+
+  auth-mysql:
+    container_name: auth-mysql
+    image: 'mysql/mysql-server:5.7'
+    volumes:
+      - ./dbdata/auth-mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: authdb
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    networks:
+      - authdb
+    restart: always
+
+  auth-service:
+    restart: always
+    container_name: auth-service
+    build: ./auth-service
+    networks:
+      - backend
+      - authdb
+    depends_on:
+      - config-service
+      - eureka-service
+      - auth-mysql
+
+  follow-mysql:
+    container_name: follow-mysql
+    image: 'mysql/mysql-server:5.7'
+    volumes:
+      - ./dbdata/follow-mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: followdb
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    networks:
+      - followdb
+    restart: always
+
+  follow-service:
+    restart: always
+    container_name: follow-service
+    build: ./follow-service
+    networks:
+      - backend
+      - followdb
+    depends_on:
+      - config-service
+      - eureka-service
+      - follow-mysql
+
+  timeline-mysql:
+    container_name: timeline-mysql
+    image: 'mysql/mysql-server:5.7'
+    volumes:
+      - ./dbdata/timeline-mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: timelinedb
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: '%'
+    networks:
+      - timelinedb
+    restart: always
+
+  timeline-service:
+    restart: always
+    container_name: timeline-service
+    build: ./timeline-service
+    networks:
+      - backend
+      - timelinedb
+    depends_on:
+      - config-service
+      - eureka-service
+      - timeline-mysql
+
+  gateway-service:
+    restart: always
+    container_name: gateway-service
+    build: ./gateway
+    ports:
+      - "8050:8050"
+    networks:
+      - backend
+      - frontend
+    depends_on:
+      - config-service
+      - eureka-service
+      - auth-service
+      - follow-service
+      - timeline-service
+      - dummy-service
+
+  nginx-service:
+    restart: always
+    container_name: nginx-service
+    image: nginx:1.13
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./static:/app/static
+    ports:
+      - 8787:80
+      # - 443:443
+    networks:
+      - frontend
+    depends_on:
+      - gateway-service
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+  authdb:
+    driver: bridge
+  followdb:
+    driver: bridge
+  timelinedb:
+    driver: bridge
