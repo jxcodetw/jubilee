@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.20.0 (f3d54d784)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: auth-service
+  name: auth-service
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.20.0 (f3d54d784)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/authdb: "true"
+        io.kompose.network/backend: "true"
+        io.kompose.service: auth-service
+    spec:
+      containers:
+      - image: gcr.io/crypto-airlock-265015/jubilee_auth-service
+        name: auth-service
+        ports:
+        - containerPort: 8555
+        resources: {}
+      restartPolicy: Always
+status: {}

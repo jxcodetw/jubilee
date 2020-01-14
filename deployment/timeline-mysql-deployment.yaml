@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.20.0 (f3d54d784)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: timeline-mysql
+  name: timeline-mysql
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.20.0 (f3d54d784)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/timelinedb: "true"
+        io.kompose.service: timeline-mysql
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_DATABASE
+          value: timelinedb
+        - name: MYSQL_ROOT_HOST
+          value: '%'
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        image: mysql/mysql-server:5.7
+        name: timeline-mysql
+        args:
+          - "--ignore-db-dir=lost+found"
+        ports:
+        - containerPort: 3306
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: timeline-mysql-claim0
+      restartPolicy: Always
+      volumes:
+      - name: timeline-mysql-claim0
+        persistentVolumeClaim:
+          claimName: timeline-mysql-claim0
+status: {}

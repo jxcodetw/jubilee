@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.20.0 (f3d54d784)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: follow-service
+  name: follow-service
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.20.0 (f3d54d784)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/backend: "true"
+        io.kompose.network/followdb: "true"
+        io.kompose.service: follow-service
+    spec:
+      containers:
+      - image: gcr.io/crypto-airlock-265015/jubilee_follow-service
+        name: follow-service
+        ports:
+        - containerPort: 8777
+        resources: {}
+      restartPolicy: Always
+status: {}

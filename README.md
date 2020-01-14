@@ -14,3 +14,9 @@ $ docker-compose dowm # clean up
 
 $ docker-compose build --no-cache [service] # build image
 ```
+
+# Deploy to k8s
+```bash
+# see ./deployments
+# see docker-compose to see if there's any file to copy
+```

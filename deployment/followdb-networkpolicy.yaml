@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: NetworkPolicy
+metadata:
+  creationTimestamp: null
+  name: followdb
+spec:
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          io.kompose.network/followdb: "true"
+  podSelector:
+    matchLabels:
+      io.kompose.network/followdb: "true"
